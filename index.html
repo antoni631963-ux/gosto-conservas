@@ -53,7 +53,12 @@
 .ga-form input{flex:1;border:1px solid var(--line);border-radius:999px;padding:10px 14px;font:14px 'DM Sans',sans-serif}
 .ga-form button{border:0;border-radius:999px;background:var(--olive);color:#fff;padding:10px 14px;font-weight:700;cursor:pointer}
 .ga-wa{display:inline-block;margin-top:6px;background:#25d366;color:#fff!important;border-radius:999px;padding:8px 12px;font-weight:700}
-@media(max-width:600px){.ga-btn{bottom:84px;padding:12px 16px}.ga-box{bottom:144px;max-height:calc(100vh - 170px)}}
+@media(max-width:600px){.ga-btn{bottom:84px;padding:10px 14px;font-size:14px}.ga-box{bottom:144px;max-height:calc(100vh - 170px)}}
+</style>
+<style id="ajustes-rodape">
+footer{padding-bottom:110px}
+.footer-note{font-size:12px;line-height:1.6}
+@media(max-width:900px){footer{padding-bottom:180px}}
 </style>
 </head>
 <body>
@@ -62,7 +67,7 @@
   <a class="brand" href="#inicio"><img src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20360%20110%22%20role%3D%22img%22%20aria-label%3D%22GOST%C3%94%20Conservas%20Artesanais%22%3E%0A%20%20%3Cg%20fill%3D%22none%22%20stroke%3D%22%2368733d%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%20%20%3Crect%20x%3D%2238%22%20y%3D%2210%22%20width%3D%2254%22%20height%3D%2212%22%20rx%3D%226%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M31%2024h68l-4%2067c-.5%208-7%2014-15%2014H50c-8%200-14-6-15-14z%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M60%2091c-2-20%203-38%2015-55%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M62%2072c-15-3-24-13-27-28%2015%200%2027%208%2032%2022%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M68%2061c8-15%2020-22%2034-22-2%2015-13%2025-31%2029%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ctext%20x%3D%22120%22%20y%3D%2272%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2248%22%20font-weight%3D%22700%22%20fill%3D%22%2368733d%22%3EGOST%C3%94%3C%2Ftext%3E%0A%20%20%3Ctext%20x%3D%22122%22%20y%3D%2294%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2212%22%20letter-spacing%3D%222.2%22%20fill%3D%22%2368733d%22%3ECONSERVAS%20ARTESANAIS%3C%2Ftext%3E%0A%3C%2Fsvg%3E" alt="GOSTÔ Conservas Artesanais"></a>
   <nav>
     <a href="#produtos">Produtos</a>
-    <a href="#receitas">Receitas</a>
+    <a href="#receitas">Como usar</a>
     <a href="#entrega">Entrega</a>
     <a href="#contato">Contato</a>
   </nav>
@@ -79,7 +84,7 @@
     <p>Conservas feitas à mão, em potes pequeno, médio e grande. Escolha o sabor, monte o carrinho e envie o pedido pelo WhatsApp.</p>
     <div class="hero-actions">
       <a class="btn" href="#produtos">Ver sabores</a>
-      <a class="btn outline" href="#receitas">Ver receitas</a>
+      <a class="btn outline" href="#receitas">Como usar</a>
     </div>
     <div class="trust-row">
       <span>✓ Produção em lotes</span>
@@ -262,42 +267,66 @@ renderFilters();renderProducts();renderRecipes();saveCart();delivery();const d=n
 const C=window.GOSTO_CONFIG||{};const P=C.products||[];
 const brl=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const waLink=t=>'https://wa.me/'+C.whatsapp+'?text='+encodeURIComponent(t||'Olá! Vim pelo site da GOSTÔ.');
-const norm=t=>t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-const sabores=()=>P.map(p=>'• '+p.name+': '+p.desc).join('\n');
-const precos=()=>P.map(p=>'• '+p.name+'\n   '+p.sizes.map(s=>s[0]+' '+s[1]+': '+brl(s[2])).join(' · ')).join('\n');
+const norm=t=>(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const WA='Olá! Vim pelo site da GOSTÔ.';
+const SIZES=[['pequen',0],['medi',1],['grand',2]];
+const NUM={um:1,uma:1,dois:2,duas:2,tres:3,quatro:4,cinco:5,seis:6,sete:7,oito:8,nove:9,dez:10};
+function findProducts(n){return P.filter(p=>{const words=norm(p.name+' '+(p.tag||'')).split(/[^a-z]+/).filter(w=>w.length>3);return words.some(w=>n.includes(w))||(n.match(/picant|pimenta|apimentad|ardid/)&&norm(p.name+p.desc).includes('picant'))})}
+function findSize(n){for(const [w,i] of SIZES){if(n.includes(w))return i}const g=n.match(/(180|300|500)\s*g/);if(g)return {180:0,300:1,500:2}[g[1]];return null}
+function findQty(n){const d=n.match(/\b(\d{1,3})\b(?!\s*g)/);if(d)return Number(d[1]);for(const w in NUM){if(new RegExp('\\b'+w+'\\b').test(n))return NUM[w]}return null}
+function productInfo(p){return p.name+': '+p.desc+'\n'+p.sizes.map(s=>'• '+s[0]+' ('+s[1]+'): '+brl(s[2])).join('\n')}
+function priceAnswer(n,prods){const si=findSize(n),q=findQty(n)||1;const list=prods.length?prods:P;
+ if(si===null)return (prods.length?'':'Preços por tamanho:\n')+list.map(productInfo).join('\n\n')+'\n\nA taxa de entrega é combinada no WhatsApp.';
+ return list.map(p=>{const s=p.sizes[si];return '• '+q+'x '+p.name+' '+s[0]+' ('+s[1]+'): '+(q>1?q+' × '+brl(s[2])+' = ':'')+brl(s[2]*q)}).join('\n')+'\n\nValor dos produtos, sem a entrega, que é combinada no WhatsApp.'}
 const R={
- sabores:()=>'Temos '+P.length+' sabores:\n'+sabores()+'\n\nQuer ver os preços?',
- precos:()=>'Preços por tamanho:\n'+precos()+'\n\nA taxa de entrega é combinada no WhatsApp.',
+ sabores:()=>'Temos '+P.length+' sabores:\n'+P.map(p=>'• '+p.name+': '+p.desc).join('\n')+'\n\nQuer saber o preço de algum? É só perguntar.',
  tamanhos:()=>'Cada sabor vem em 3 tamanhos: Pequeno (180 g), Médio (300 g) e Grande (500 g).',
- pedir:()=>'É fácil:\n1. Em "Escolha seu pote", selecione o tamanho e toque em Comprar.\n2. Abra o carrinho, preencha nome e endereço.\n3. Toque em "Enviar pelo WhatsApp".\nA gente responde confirmando o total.',
+ pedir:()=>'É fácil:\n1. Em "Escolha seu pote", selecione o tamanho e toque em Comprar.\n2. Abra o carrinho e preencha nome e endereço.\n3. Toque em "Enviar pelo WhatsApp".\nA gente responde confirmando o total e a entrega.',
  entrega:()=>'A entrega é combinada pelo WhatsApp: confirmamos se atendemos o seu bairro, a taxa e o melhor dia e horário.',
+ retirada:()=>'Vendemos pelo site e pelo WhatsApp. Se preferir retirar em vez de receber, pergunte no WhatsApp se é possível para o seu pedido.',
  pagamento:()=>'Formas de pagamento: '+(C.paymentMethods||['Pix']).join(', ')+'. A forma escolhida é confirmada no WhatsApp.',
- conservacao:()=>'Siga sempre a orientação do rótulo. Depois de aberto, guarde na geladeira e use talheres limpos.\n\nImportante: não consuma se a tampa estiver estufada, se o pote estiver vazando, com bolhas, cheiro ou aparência estranhos.',
- ingredientes:()=>'Os ingredientes e possíveis alergênicos estão no rótulo de cada pote. Se tiver alguma alergia ou restrição, fale com a gente no WhatsApp antes de pedir, que confirmamos.',
+ conservacao:()=>'Siga sempre a orientação do rótulo, que traz a validade de cada lote. Depois de aberto, guarde na geladeira e use talheres limpos.\n\nImportante: não consuma se a tampa estiver estufada, se o pote estiver vazando, com bolhas, cheiro ou aparência estranhos.',
+ ingredientes:()=>'Ingredientes e possíveis alergênicos estão no rótulo de cada pote. Se tiver alguma alergia, restrição ou dúvida sobre a composição, fale com a gente no WhatsApp antes de pedir, que confirmamos.',
+ encomenda:()=>'Para encomendas maiores, festas, kits de presente ou revenda, fale direto com a gente no WhatsApp para combinar quantidades, prazo e valor.',
+ horario:()=>'O atendimento é pelo WhatsApp. Respondemos assim que possível.',
+ redes:()=>'Por enquanto, nosso atendimento é pelo WhatsApp e pelo e-mail '+(C.contactEmail||'')+'.',
+ desconto:()=>'No momento não há cupom no site. Para pedidos maiores, fale com a gente no WhatsApp.',
+ problema:()=>'Se houver qualquer problema com o produto, ou se quiser saber sobre troca ou devolução do pote, fale com a gente no WhatsApp que resolvemos.',
  pessoa:()=>'Claro! Toque no botão abaixo para falar com a gente no WhatsApp.',
  oi:()=>'Olá! Como posso ajudar? Escolha uma opção abaixo ou escreva sua pergunta.',
  obrigado:()=>'Por nada! Se precisar, é só chamar. 😊'
 };
+const HAND=['entrega','retirada','ingredientes','encomenda','horario','desconto','problema','pessoa'];
 const K=[
- ['pessoa',['atendente','pessoa','humano','falar com','whats','zap','telefone','contato','ligar']],
- ['conservacao',['conserv','geladeira','validade','vence','aberto','abrir','guardar','estufad','durar','dura ']],
- ['ingredientes',['ingrediente','alerg','gluten','lactose','vegano','vegetariano','contem','composicao','acucar']],
- ['precos',['preco','valor','quanto','custa','barato','caro','r$']],
- ['tamanhos',['tamanho','grama','peso','pequeno','medio','grande','pote']],
- ['entrega',['entreg','frete','taxa','bairro','cidade','regiao','chega','prazo','retirar','retirada']],
- ['pagamento',['pagamento','pagar','pix','cartao','dinheiro','debito','credito']],
- ['pedir',['pedido','pedir','comprar','compra','carrinho','encomenda']],
- ['sabores',['sabor','opcao','opcoes','produto','tem o que','cardapio','catalogo','picante','alho','mediterr']],
+ ['pessoa',['atendente','pessoa','humano','falar com','whats','zap','telefone','ligar','contato']],
+ ['problema',['problema','devolv','devoluc','troca','trocar','reembolso','estragad','quebrad','reclama','vidro de volta','retornav']],
+ ['encomenda',['encomenda','festa','evento','casamento','aniversario','atacado','revenda','revender','kit','presente','lote','muitos','grande quantidade']],
+ ['ingredientes',['ingrediente','alerg','gluten','lactose','vegano','vegana','vegetarian','contem','composicao','acucar','conservante','natural','organic','sodio','sal ']],
+ ['conservacao',['conservar','conservacao','geladeira','validade','vence','venciment','aberto','abrir','guardar','estufad','durar','dura ','quanto tempo']],
+ ['desconto',['desconto','cupom','promoc','promo ','oferta','barato']],
+ ['horario',['horario','que horas','abre','fecha','atendimento']],
+ ['redes',['instagram','insta','facebook','tiktok','rede social','redes sociais','youtube']],
+ ['retirada',['retirar','retirada','buscar','onde fica','endereco','loja fisica','loja','ponto']],
+ ['entrega',['entreg','frete','taxa','bairro','cidade','regiao','chega','prazo','rio preto','bady']],
+ ['pagamento',['pagamento','pagar','pix','cartao','dinheiro','debito','credito','parcel']],
+ ['precos',['preco','valor','quanto','custa','caro','r$','total']],
+ ['tamanhos',['tamanho','grama','peso','pote','pequeno','medio','grande']],
+ ['pedir',['pedido','pedir','comprar','compra','carrinho','como faco']],
+ ['sabores',['sabor','opcao','opcoes','produto','cardapio','catalogo','tem o que','o que voces']],
  ['obrigado',['obrigad','valeu','agradec']],
- ['oi',['oi','ola','bom dia','boa tarde','boa noite','tudo bem']]
+ ['oi',['oi','ola','bom dia','boa tarde','boa noite','tudo bem','e ai']]
 ];
 const box=document.getElementById('gaBox'),msgs=document.getElementById('gaMsgs'),chips=document.getElementById('gaChips'),inp=document.getElementById('gaIn');
 function add(t,me,wa){const d=document.createElement('div');d.className='ga-m '+(me?'ga-me':'ga-bot');d.textContent=t;if(wa){const a=document.createElement('a');a.className='ga-wa';a.href=waLink(wa);a.target='_blank';a.rel='noopener';a.textContent='Falar no WhatsApp';d.appendChild(document.createElement('br'));d.appendChild(a)}msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight}
-function answer(q){const n=norm(q);let key=null;for(const [k,words] of K){if(words.some(w=>n.includes(w))){key=k;break}}
- if(!key){add('Desculpe, não sei responder isso com certeza. Para não te passar informação errada, fale com a gente no WhatsApp.',false,'Olá! Vim pelo site da GOSTÔ e tenho uma dúvida: '+q);return}
- add(R[key](),false,(key==='pessoa'||key==='ingredientes'||key==='entrega')?'Olá! Vim pelo site da GOSTÔ.':null)}
-const opts=[['Sabores','sabores'],['Preços','precos'],['Como pedir','pedir'],['Entrega','entrega'],['Pagamento','pagamento'],['Conservação','conservacao'],['Falar com uma pessoa','pessoa']];
-chips.innerHTML='';opts.forEach(([l,k])=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.onclick=()=>{add(l,true);answer(l==='Falar com uma pessoa'?'falar com pessoa':l)};chips.appendChild(b)});
+function answer(q){const n=' '+norm(q)+' ';let key=null;for(const [k,words] of K){if(words.some(w=>n.includes(w))){key=k;break}}
+ const prods=findProducts(n);
+ if(key==='precos'||(key==='tamanhos'&&(findQty(n)||prods.length))){add(priceAnswer(n,prods));return}
+ if(!key&&prods.length){add(prods.map(productInfo).join('\n\n')+'\n\nQuer pedir? Toque em "Ver sabores" no site ou pergunte aqui.');return}
+ if(key==='sabores'&&prods.length){add(prods.map(productInfo).join('\n\n'));return}
+ if(!key){add('Desculpe, não sei responder isso com certeza. Para não te passar informação errada, fale com a gente no WhatsApp.',false,WA+' Tenho uma dúvida: '+q);return}
+ add(R[key](),false,HAND.includes(key)?WA:null)}
+const opts=[['Sabores','sabores'],['Preços','preço'],['Como pedir','como pedir'],['Entrega','entrega'],['Pagamento','pagamento'],['Conservação','conservação'],['Falar com uma pessoa','falar com pessoa']];
+chips.innerHTML='';opts.forEach(([l,q])=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.onclick=()=>{add(l,true);answer(q)};chips.appendChild(b)});
 let started=false;
 window.gaToggle=function(){box.classList.toggle('show');if(box.classList.contains('show')&&!started){started=true;add('Olá! Sou o assistente virtual da GOSTÔ, um atendimento automático. Posso tirar dúvidas sobre sabores, preços, pedidos e entrega. Para algo diferente, te passo para uma pessoa no WhatsApp.')}if(box.classList.contains('show'))setTimeout(()=>inp.focus(),50)};
 document.getElementById('gaForm').addEventListener('submit',e=>{e.preventDefault();const q=inp.value.trim();if(!q)return;add(q,true);inp.value='';setTimeout(()=>answer(q),250)});
